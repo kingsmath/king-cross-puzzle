@@ -27,25 +27,52 @@
     --chalk-green:#8be07a;
     --chalk-red:#ff6b6b;
     --shadow-deep: rgba(0,0,0,.55);
+    --puzzle-scale: 1.0;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 18px;
+    --space-5: 26px;
+    --space-6: 34px;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
   }
 
-  * { box-sizing: border-box; }
+  *, *::before, *::after {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Allow pointer interactions on inputs, buttons, sliders, links */
+  input, label, button, select, textarea, a, span {
+    touch-action: auto;
+  }
 
   html, body {
-    height:100%;
-    margin:0;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
   }
 
   body {
     font-family:'Gaegu','Malgun Gothic', sans-serif;
     color: var(--chalk-white);
-    background: linear-gradient(160deg, var(--board-bg-1), var(--board-bg-2));
-    min-height:100vh;
-    padding: 14px;
+    background:
+      repeating-linear-gradient(0deg, rgba(244,241,230,.035) 0px, rgba(244,241,230,.035) 1px, transparent 1px, transparent 42px),
+      repeating-linear-gradient(90deg, rgba(244,241,230,.035) 0px, rgba(244,241,230,.035) 1px, transparent 1px, transparent 42px),
+      linear-gradient(160deg, var(--board-bg-1), var(--board-bg-2));
+    padding: 10px;
     text-align:center;
-    overscroll-behavior:none;
     position:relative;
-    overflow-x:hidden;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -67,142 +94,250 @@
 
   /* ===== 상단 플로팅 컨트롤 버튼 (홈 / 전체화면) ===== */
   .float-btn {
-    position: fixed; top: 18px; z-index: 500;
-    width: 54px; height: 54px; border-radius: 50%;
+    position: fixed; top: 14px; z-index: 500;
+    width: 50px; height: 50px; border-radius: 50%;
     display:flex; align-items:center; justify-content:center;
     background: linear-gradient(160deg, #3a2413, #23150a);
     border: 3px solid rgba(244,241,230,.55);
     box-shadow: 0 4px 10px var(--shadow-deep), inset 0 0 8px rgba(255,255,255,.08);
-    color: var(--chalk-white); font-size: 1.5rem; cursor:pointer;
+    color: var(--chalk-white); font-size: 1.35rem; cursor:pointer;
     opacity: .5; transition: opacity .25s ease, transform .2s ease;
   }
   .float-btn:hover, .float-btn:focus-visible { opacity: 1; transform: scale(1.08); }
   .float-btn:active { transform: scale(.94); }
-  #home-btn { left: 18px; }
-  #fullscreen-btn { right: 18px; }
+  #home-btn { left: 14px; }
+  #fullscreen-btn { right: 14px; }
 
   /* ================= 첫 화면 (설정 화면) ================= */
   #setup-screen {
     position:relative; z-index:1;
-    max-width: 760px; width:100%; margin: 0 auto;
-    padding: 20px 30px 22px 30px;
-    border-radius: 18px;
+    max-width: 800px; width:100%; margin: 0 auto;
+    padding: var(--space-5) var(--space-6) var(--space-5);
+    border-radius: var(--radius-lg);
     background: linear-gradient(160deg, #1a3730, #12241f);
-    box-shadow: 0 10px 24px var(--shadow-deep);
+    box-shadow: 0 10px 28px var(--shadow-deep), inset 0 0 0 1px rgba(244,241,230,.06);
     border: 8px solid var(--frame-wood-1);
+    max-height: 95vh;
+    overflow-y: auto;
   }
 
+  /* ---- 히어로: 미니 수식 타일 + 타이틀 ---- */
+  .hero {
+    display:flex; align-items:center; gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    text-align:left;
+  }
+  .hero-badge { flex: 0 0 auto; }
+  .mini-eq {
+    display:flex; align-items:center; gap:3px;
+    transform: rotate(-4deg);
+    filter: drop-shadow(0 5px 8px rgba(0,0,0,.45));
+    animation: heroFloat 5s ease-in-out infinite;
+  }
+  @keyframes heroFloat {
+    0%,100% { transform: rotate(-4deg) translateY(0); }
+    50% { transform: rotate(-2deg) translateY(-5px); }
+  }
+  .mini-cell {
+    display:flex; align-items:center; justify-content:center;
+    width: 36px; height: 36px; border-radius: 9px;
+    font-family:'Jua'; font-size: 1.15rem; line-height:1;
+  }
+  .mini-cell.num {
+    background: linear-gradient(160deg, var(--chalk-white), #d8d3c2);
+    color:#2a1c08; box-shadow: 0 3px 0 rgba(0,0,0,.32);
+  }
+  .mini-cell.ans {
+    background: linear-gradient(160deg, var(--chalk-yellow), #e6a83a);
+    color:#2a1c08; box-shadow: 0 3px 0 #b57a1e;
+  }
+  .mini-cell.op, .mini-cell.eq {
+    width: 20px; background: transparent; color: rgba(244,241,230,.8);
+    font-size: 1.25rem;
+  }
+
+  .hero-text { flex: 1 1 auto; min-width:0; }
+
   .title-eyebrow {
-    display:inline-block; font-family:'Gaegu'; font-size:.95rem;
-    color: var(--chalk-yellow); letter-spacing: 3px; margin-bottom: 2px;
+    display:block; font-family:'Gaegu'; font-size:.82rem;
+    color: var(--chalk-yellow); letter-spacing: 2.5px; margin-bottom: 4px;
+    opacity:.9;
   }
 
   #setup-screen h1 {
-    font-size: 1.9rem; letter-spacing: 1px;
-    text-shadow: 0 0 14px rgba(244,241,230,.35);
-    margin-bottom: 10px;
+    font-size: clamp(1.7rem, 4.4vw, 2.35rem); letter-spacing: .5px; line-height:1.08;
+    text-shadow: 0 0 14px rgba(244,241,230,.3);
   }
   #setup-screen h1 .accent { color: var(--chalk-yellow); }
 
   .subtitle {
-    font-size: .95rem; color: rgba(244,241,230,.7); margin-bottom: 8px;
+    font-family:'Gaegu'; font-size: .92rem; color: rgba(244,241,230,.62);
+    margin-top: 5px;
   }
 
+  /* ---- VS 팀 배지 ---- */
   .vs-badge-mini {
-    display:inline-flex; align-items:center; gap:10px; margin: 0 0 12px 0;
-    font-family:'Jua'; font-size: .9rem; color: var(--chalk-white);
+    display:flex; align-items:center; justify-content:center; gap: var(--space-2);
+    flex-wrap: wrap;
+    margin: 0 0 var(--space-4) 0;
   }
+  .team-chip {
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:'Jua'; font-size: .85rem; color: var(--chalk-white);
+    background: rgba(255,255,255,.05);
+    border: 2px solid rgba(244,241,230,.18);
+    border-radius: 999px; padding: 6px 16px;
+  }
+  .team-chip.p1 { border-color: rgba(255,211,92,.4); }
+  .team-chip.p2 { border-color: rgba(111,227,224,.4); }
+  .team-chip em { font-style:normal; font-family:'Gaegu'; font-size:.75rem; color: rgba(244,241,230,.5); margin-left:1px; }
   .vs-badge-mini span.dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
   .vs-badge-mini .p1dot { background: var(--chalk-yellow); box-shadow:0 0 8px var(--chalk-yellow); }
   .vs-badge-mini .p2dot { background: var(--chalk-cyan); box-shadow:0 0 8px var(--chalk-cyan); }
+  .vs-mini {
+    width: 28px; height: 28px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Jua'; font-size:.72rem; color: rgba(244,241,230,.55);
+    background: rgba(0,0,0,.28); border: 2px solid rgba(244,241,230,.2);
+  }
 
+  .section-divider {
+    border: none; border-top: 2px dashed rgba(244,241,230,.18);
+    margin: 0 0 var(--space-4) 0;
+  }
+
+  /* ---- 설정 카드 그리드 (4장 카드 높이/중심 균형) ---- */
   .settings-grid {
-    display:grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    text-align:left; margin-bottom: 12px;
+    display:grid; grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    text-align:left; margin-bottom: var(--space-4);
   }
   .setting-group {
+    display:flex; flex-direction:column;
     text-align:left;
-    background: rgba(0,0,0,.16);
-    border: 2px dashed rgba(244,241,230,.25);
-    border-radius: 12px; padding: 10px 14px;
+    background: rgba(0,0,0,.18);
+    border: 2px solid rgba(244,241,230,.14);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    transition: border-color .2s ease, background .2s ease;
   }
+  .setting-group:hover { border-color: rgba(244,241,230,.28); }
   .setting-group h3 {
-    font-size: .98rem; margin-bottom: 8px; color: var(--chalk-yellow);
-    display:flex; align-items:center; gap:6px;
+    flex: 0 0 auto;
+    font-size: .95rem; margin-bottom: var(--space-2); color: var(--chalk-white);
+    display:flex; align-items:center; gap:8px;
   }
+  .setting-group h3 .ico {
+    display:flex; align-items:center; justify-content:center;
+    width: 26px; height: 26px; border-radius: 50%;
+    font-size: .95rem; flex-shrink:0;
+  }
+  .setting-group h3 .en {
+    font-family:'Gaegu'; font-size:.7rem; color: rgba(244,241,230,.4);
+    letter-spacing: .5px; text-transform: uppercase; margin-left: -2px;
+  }
+  /* 카드 내부 컨텐츠를 세로 중앙에 배치해 카드 높이가 늘어나도 균형이 유지됨 */
+  .setting-group > *:not(h3) { margin-top: auto; margin-bottom: auto; width:100%; }
 
-  .timer-options { display:flex; gap:8px; flex-wrap:wrap; margin-top:2px; }
+  .setting-group--time h3 .ico { background: rgba(255,143,163,.2); }
+  .setting-group--level h3 .ico { background: rgba(139,224,122,.2); }
+  .setting-group--ops h3 .ico { background: rgba(111,227,224,.2); }
+  .setting-group--blanks h3 .ico { background: rgba(255,211,92,.2); }
+
+  .timer-options { display:flex; gap:6px; flex-wrap:wrap; }
   .timer-options label {
-    background: rgba(255,255,255,.06); padding: 6px 14px; border-radius: 30px;
-    cursor:pointer; border: 2px solid rgba(244,241,230,.25);
-    font-family:'Jua'; font-size:.88rem; transition:.2s;
+    background: rgba(255,255,255,.06); padding: 6px 14px; border-radius: 999px;
+    cursor:pointer; border: 2px solid rgba(244,241,230,.22);
+    font-family:'Jua'; font-size:.85rem; transition:.15s;
   }
   .timer-options input[type="radio"] { display:none; }
   .timer-options input[type="radio"]:checked + span { color:#12241f; }
   .timer-options label:has(input:checked) {
-    border-color: var(--chalk-yellow); background: var(--chalk-yellow);
-    box-shadow: 0 0 14px rgba(255,211,92,.5);
+    border-color: var(--chalk-pink); background: var(--chalk-pink);
+    box-shadow: 0 0 14px rgba(255,143,163,.5);
   }
 
-  .op-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 2px; }
+  .op-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .op-check {
     display:flex; align-items:center; gap:8px;
     background: rgba(255,255,255,.05); border: 2px solid rgba(244,241,230,.2);
-    border-radius: 8px; padding: 6px 10px; cursor:pointer; font-size:1.02rem;
-    font-family:'Jua'; transition:.2s;
+    border-radius: var(--radius-sm); padding: 6px 8px; cursor:pointer; font-size:.95rem;
+    font-family:'Jua'; transition:.15s;
   }
-  .op-check:has(input:checked) { border-color: var(--chalk-cyan); background: rgba(111,227,224,.12); }
-  .op-check input { width:16px; height:16px; accent-color: var(--chalk-cyan); }
-  .op-symbol { font-size:1.2rem; width: 24px; text-align:center; }
+  .op-check:has(input:checked) { border-color: var(--chalk-cyan); background: rgba(111,227,224,.14); }
+  .op-check input { width:15px; height:15px; accent-color: var(--chalk-cyan); }
+  .op-symbol { font-size:1.1rem; width: 22px; text-align:center; }
 
-  .difficulty-btns { display:flex; gap:8px; flex-wrap:wrap; }
+  .difficulty-btns { display:flex; gap:6px; flex-wrap:wrap; }
   .difficulty-btns button {
-    padding: 8px 14px; border:2px solid rgba(244,241,230,.25); border-radius: 8px;
+    padding: 7px 13px; border:2px solid rgba(244,241,230,.22); border-radius: 999px;
     cursor:pointer; background: rgba(255,255,255,.05); color: var(--chalk-white);
-    font-family:'Jua'; font-size:.85rem; transition:.2s;
+    font-family:'Jua'; font-size:.8rem; transition:.15s;
   }
   .difficulty-btns button.active {
     background: var(--chalk-green); color:#12241f; border-color: var(--chalk-green);
     box-shadow: 0 0 14px rgba(139,224,122,.5);
   }
 
-  .slider-container { display:flex; align-items:center; gap:12px; margin-top:8px; font-family:'Jua'; font-size:.92rem; }
-  .slider-container:first-of-type { margin-top: 0; }
-  input[type="range"] { flex-grow:1; accent-color: var(--chalk-cyan); height: 5px; }
+  .blanks-sliders { display:flex; flex-direction:column; gap: var(--space-2); }
+  .slider-container { display:flex; align-items:center; gap:10px; font-family:'Jua'; font-size:.85rem; }
+  .slider-container label { flex: 0 0 auto; white-space: nowrap; }
+  input[type="range"] { flex-grow:1; accent-color: var(--chalk-cyan); height: 5px; cursor: pointer; }
 
   .start-btn {
-    width:100%; padding:13px; font-size:1.25rem; font-family:'Jua';
+    width:100%; padding: 14px; font-size:1.2rem; font-family:'Jua';
+    display:flex; align-items:center; justify-content:center; gap:8px;
     background: linear-gradient(160deg, var(--chalk-yellow), #e6a83a);
-    color:#2a1c08; border:none; border-radius: 12px; cursor:pointer;
-    letter-spacing: 2px; margin-top: 2px;
-    box-shadow: 0 6px 0 #b57a1e, 0 12px 20px var(--shadow-deep);
+    color:#2a1c08; border:none; border-radius: var(--radius-md); cursor:pointer;
+    letter-spacing: 1.5px;
+    box-shadow: 0 5px 0 #b57a1e, 0 10px 20px var(--shadow-deep);
     transition: transform .08s ease;
   }
-  .start-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #b57a1e, 0 5px 12px var(--shadow-deep); }
+  .start-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #b57a1e, 0 5px 10px var(--shadow-deep); }
 
   .other-game-link {
-    display:block; text-align:center; margin-top: 10px;
-    font-family:'Gaegu'; font-size:.85rem; color: rgba(244,241,230,.55);
+    display:block; text-align:center; margin-top: var(--space-3);
+    font-family:'Gaegu'; font-size:.8rem; color: rgba(244,241,230,.5);
     text-decoration: underline; text-underline-offset: 3px; cursor:pointer;
   }
   .other-game-link:hover { color: var(--chalk-yellow); }
 
   /* ================= 게임 화면 (좌우 반반, 넓고 크게) ================= */
-  #game-screen { display:none; flex-direction:column; align-items:center; position:relative; z-index:1; width:100%; }
+  #game-screen {
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    z-index:1;
+    width:100%;
+    height: 100%;
+    max-height: 100vh;
+  }
 
   #timer-display {
-    font-family:'Jua'; font-size: 2.6rem; font-weight:normal; color: var(--chalk-yellow);
-    margin: 4px auto 16px auto; padding: 8px 34px;
-    background: rgba(0,0,0,.3); border-radius: 14px;
+    font-family:'Jua'; font-size: 2rem; font-weight:normal; color: var(--chalk-yellow);
+    margin: 4px auto 10px auto; padding: 6px 24px;
+    background: rgba(0,0,0,.3); border-radius: 12px;
     border: 3px dashed rgba(244,241,230,.4);
     width:max-content; letter-spacing:3px;
     box-shadow: inset 0 0 12px rgba(0,0,0,.4);
+    z-index: 10;
   }
 
-  .arena-wrap { position:relative; width:100%; }
+  .arena-wrap {
+    position:relative;
+    width:100%;
+    flex-grow: 1;
+    display: flex;
+    align-items: flex-end; /* Align puzzles to the bottom */
+    justify-content: center;
+    min-height: 0;
+    padding-bottom: 10px;
+  }
 
   .vs-badge {
-    position:absolute; top: 44%; left:50%; transform: translate(-50%,-50%) rotate(-6deg);
+    position:absolute; top: 50%; left:50%; transform: translate(-50%,-50%) rotate(-6deg);
     z-index: 20; font-family:'Jua'; font-size: 2.4rem; color: var(--chalk-white);
     background: radial-gradient(circle, #c94f4f 55%, #8f2f2f 100%);
     width: 108px; height:108px; border-radius: 50%;
@@ -230,11 +365,20 @@
   .vs-badge.retry-mode .vs-badge-text { display:none; }
   .vs-badge.retry-mode .vs-retry-btn { display:block; }
 
-  .battle-arena { display:flex; gap: 16px; justify-content:center; flex-wrap:nowrap; width:100%; align-items:stretch; }
+  .battle-arena {
+    display:flex;
+    gap: 12px;
+    justify-content:center;
+    align-items: flex-end; /* Align board components internally to bottom */
+    width:100%;
+    max-width: 1400px;
+  }
 
   .player-board {
-    flex: 1 1 50%; width:50%; max-width:none; min-width:0;
-    border-radius: 16px; padding: 22px 26px 28px 26px;
+    flex: 1 1 0;
+    min-width: 0;
+    border-radius: 16px;
+    padding: calc(var(--puzzle-scale) * 12px) calc(var(--puzzle-scale) * 16px) calc(var(--puzzle-scale) * 18px) calc(var(--puzzle-scale) * 16px);
     display:flex; flex-direction:column; align-items:center;
     position: relative;
     background: linear-gradient(165deg, #1a352d, #102019);
@@ -247,10 +391,76 @@
   #board-p1 h2 { color: var(--chalk-yellow); text-shadow: 0 0 10px rgba(255,211,92,.4); }
   #board-p2 h2 { color: var(--chalk-cyan); text-shadow: 0 0 10px rgba(111,227,224,.4); }
 
-  .player-board h2 { font-size: 1.6rem; margin-bottom: 4px; }
+  .player-board h2 {
+    font-size: calc(var(--puzzle-scale) * 1.5rem);
+    margin-bottom: calc(var(--puzzle-scale) * 4px);
+  }
 
   .player-board.winner-board {
     box-shadow: 0 0 0 5px var(--chalk-yellow);
+  }
+
+  /* 중간 크기/높이 조절 게이지 바 */
+  .middle-divider-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; /* Align bottom scale panel */
+    width: 70px;
+    align-self: stretch;
+    position: relative;
+    z-index: 10;
+    padding-bottom: 12px;
+  }
+
+  /* 퍼즐 크기 조절 패널 */
+  .scale-control-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(160deg, #3a2413, #23150a);
+    border: 3px solid rgba(244,241,230,.55);
+    border-radius: 12px;
+    padding: 8px 6px;
+    gap: 4px;
+    box-shadow: 0 4px 10px var(--shadow-deep);
+    z-index: 100;
+    width: 60px;
+  }
+  .scale-label-line {
+    font-family: 'Jua';
+    font-size: 0.8rem;
+    color: var(--chalk-yellow);
+    line-height: 1.15;
+    text-align: center;
+  }
+  .scale-action-btn {
+    width: 44px;
+    height: 34px;
+    border-radius: 6px;
+    border: 2px solid var(--chalk-white);
+    background: rgba(255,255,255,0.15);
+    color: var(--chalk-white);
+    font-family: 'Jua';
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: none;
+    transition: background 0.1s, transform 0.05s;
+    outline: none;
+  }
+  .scale-action-btn:active {
+    background: rgba(255,255,255,0.35);
+    transform: scale(0.92);
+  }
+  .scale-pct-text {
+    font-family: 'Jua';
+    font-size: 0.78rem;
+    color: var(--chalk-white);
+    margin-top: 2px;
   }
 
   /* 게임판 상단 결과/승리 배너 */
@@ -280,20 +490,27 @@
     background: rgba(111,227,224,.15); color: var(--chalk-cyan);
     border: 2px solid rgba(111,227,224,.5);
   }
-  .banner-title { font-size: 1.3rem; }
-  .banner-sub { font-size: .95rem; opacity:.85; margin-top:2px; }
+  .banner-title { font-size: 1.25rem; }
+  .banner-sub { font-size: .9rem; opacity:.85; margin-top:2px; }
   @keyframes bannerPop { 0%{ transform:scale(.7); } 60%{ transform:scale(1.08);} 100%{ transform:scale(1);} }
   @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
 
   /* 퍼즐 그리드 */
   .grid-container {
-    display:grid; grid-template-columns: repeat(5, min(9vw, 96px)); grid-template-rows: repeat(5, min(9vw, 96px));
-    gap: 5px; width:max-content; margin: 4px auto 22px auto;
-    background: rgba(0,0,0,.22); padding: 7px; border-radius: 10px;
+    display:grid;
+    grid-template-columns: repeat(5, calc(var(--puzzle-scale) * min(11vw, 11vh, 120px)));
+    grid-template-rows: repeat(5, calc(var(--puzzle-scale) * min(11vw, 11vh, 120px)));
+    gap: calc(var(--puzzle-scale) * 5px);
+    width:max-content;
+    margin: calc(var(--puzzle-scale) * 4px) auto calc(var(--puzzle-scale) * 12px) auto;
+    background: rgba(0,0,0,.22);
+    padding: calc(var(--puzzle-scale) * 7px);
+    border-radius: 10px;
   }
   .cell {
     display:flex; justify-content:center; align-items:center;
-    font-size: clamp(1.4rem, 3vw, 2.1rem); font-family:'Jua'; color: var(--chalk-white);
+    font-size: calc(var(--puzzle-scale) * clamp(1.4rem, 3vw, 2.1rem));
+    font-family:'Jua'; color: var(--chalk-white);
     background: rgba(255,255,255,.03); border-radius: 8px;
     box-sizing:border-box;
   }
@@ -312,15 +529,20 @@
 
   /* 드래그 팔레트 및 아이템 */
   .palette {
-    display:flex; flex-wrap:wrap; gap: 12px; justify-content:center;
-    min-height: 90px; padding: 16px; width:100%;
+    display:flex; flex-wrap:wrap; gap: calc(var(--puzzle-scale) * 12px); justify-content:center;
+    min-height: calc(var(--puzzle-scale) * 90px);
+    padding: calc(var(--puzzle-scale) * 12px);
+    width:100%;
     background: rgba(0,0,0,.2); border-radius: 12px;
     border: 2px dashed rgba(244,241,230,.25);
   }
 
   .drag-item {
-    width: min(9vw, 74px); height: min(9vw, 74px); display:flex; justify-content:center; align-items:center;
-    font-size: clamp(1.4rem, 3vw, 2rem); font-family:'Jua'; color:#2a1c08;
+    width: calc(var(--puzzle-scale) * min(11vw, 10vh, 90px));
+    height: calc(var(--puzzle-scale) * min(11vw, 10vh, 90px));
+    display:flex; justify-content:center; align-items:center;
+    font-size: calc(var(--puzzle-scale) * clamp(1.4rem, 3vw, 2rem));
+    font-family:'Jua'; color:#2a1c08;
     background: linear-gradient(160deg, var(--chalk-white), #d8d3c2);
     border-radius: 10px; cursor:grab; user-select:none;
     touch-action:none;
@@ -338,12 +560,48 @@
   @media (max-width: 760px) {
     .battle-arena { flex-wrap: wrap; }
     .player-board { flex: 1 1 100%; width:100%; }
-    .grid-container { grid-template-columns: repeat(5, 50px); grid-template-rows: repeat(5, 50px); }
-    .cell { font-size: 1.25rem; }
-    .drag-item { width:46px; height:46px; font-size:1.25rem; }
-    .vs-badge { width:64px; height:64px; font-size:1.4rem; }
-    #setup-screen h1 { font-size: 1.6rem; }
+    .middle-divider-bar {
+      width: 100%;
+      flex-direction: row;
+      height: auto;
+      padding: 10px;
+      order: 2;
+      justify-content: center;
+    }
+    .scale-control-panel {
+      flex-direction: row;
+      width: auto;
+      height: auto;
+      padding: 6px 12px;
+      gap: 8px;
+    }
+    .scale-label-line {
+      display: inline-block;
+      font-size: 0.85rem;
+    }
+    .vs-badge {
+      width: 76px;
+      height: 76px;
+      font-size: 1.6rem;
+    }
+    .grid-container {
+      grid-template-columns: repeat(5, calc(var(--puzzle-scale) * 46px));
+      grid-template-rows: repeat(5, calc(var(--puzzle-scale) * 46px));
+    }
+    .cell { font-size: calc(var(--puzzle-scale) * 1.25rem); }
+    .drag-item {
+      width: calc(var(--puzzle-scale) * 42px);
+      height: calc(var(--puzzle-scale) * 42px);
+      font-size: calc(var(--puzzle-scale) * 1.25rem);
+    }
+    #setup-screen { padding: var(--space-4) var(--space-4) var(--space-4); }
+    .hero { flex-direction:column; text-align:center; gap: var(--space-2); }
+    .hero-text { text-align:center; }
+    .title-eyebrow { text-align:center; }
+    .subtitle { text-align:center; }
+    #setup-screen h1 { font-size: 1.7rem; }
     .settings-grid { grid-template-columns: 1fr; }
+    .setting-group > *:not(h3) { margin-top:0; margin-bottom:0; }
   }
 </style>
 </head>
@@ -355,16 +613,38 @@
 <span class="chalk-float" style="bottom:16%; left:10%; font-size:3rem;">÷</span>
 
 <!-- 상단 플로팅 컨트롤 -->
-<button id="home-btn" class="float-btn" onclick="goHome()" title="처음 화면으로">🏠</button>
-<button id="fullscreen-btn" class="float-btn" onclick="toggleFullscreen()" title="전체화면 전환">⛶</button>
+<button id="home-btn" class="float-btn" onpointerdown="goHome()" title="처음 화면으로">🏠</button>
+<button id="fullscreen-btn" class="float-btn" onpointerdown="toggleFullscreen()" title="전체화면 전환">⛶</button>
 
 <div id="setup-screen">
-  <h1>CROSS PUZZLE KING</h1>
-  <div class="vs-badge-mini"><span class="dot p1dot"></span> 왼쪽팀 Left Team &nbsp;VS&nbsp; Right Team 오른쪽팀 <span class="dot p2dot"></span></div>
+  <div class="hero">
+    <div class="hero-badge" aria-hidden="true">
+      <div class="mini-eq">
+        <span class="mini-cell num">4</span>
+        <span class="mini-cell op">+</span>
+        <span class="mini-cell num">3</span>
+        <span class="mini-cell eq">=</span>
+        <span class="mini-cell ans">7</span>
+      </div>
+    </div>
+    <div class="hero-text">
+      <span class="title-eyebrow">수식 크로스 퍼즐 · MATH CROSS PUZZLE</span>
+      <h1>CROSS PUZZLE <span class="accent">KING</span></h1>
+      <p class="subtitle">두 팀이 함께 풀어요, 먼저 완성하는 팀이 승리! 🏆</p>
+    </div>
+  </div>
+
+  <div class="vs-badge-mini">
+    <span class="team-chip p1"><span class="dot p1dot"></span>왼쪽팀 <em>Left</em></span>
+    <span class="vs-mini">VS</span>
+    <span class="team-chip p2">오른쪽팀 <em>Right</em><span class="dot p2dot"></span></span>
+  </div>
+
+  <hr class="section-divider">
 
   <div class="settings-grid">
-    <div class="setting-group">
-      <h3>⏱ 게임 시간 Time</h3>
+    <div class="setting-group setting-group--time">
+      <h3><span class="ico">⏱</span>게임 시간 <span class="en">Time</span></h3>
       <div class="timer-options">
         <label><input type="radio" name="timer" value="60"><span>1min</span></label>
         <label><input type="radio" name="timer" value="120"><span>2min</span></label>
@@ -373,15 +653,17 @@
       </div>
     </div>
 
-    <div class="setting-group difficulty-btns">
-      <h3 style="width:100%;">🎯 난이도 Level</h3>
-      <button type="button" class="diff-btn active" data-level="easy">초급 Easy</button>
-      <button type="button" class="diff-btn" data-level="normal">중급 Normal</button>
-      <button type="button" class="diff-btn" data-level="hard">고급 Hard</button>
+    <div class="setting-group setting-group--level">
+      <h3><span class="ico">🎯</span>난이도 <span class="en">Level</span></h3>
+      <div class="difficulty-btns">
+        <button type="button" class="diff-btn active" data-level="easy">초급 Easy</button>
+        <button type="button" class="diff-btn" data-level="normal">중급 Normal</button>
+        <button type="button" class="diff-btn" data-level="hard">고급 Hard</button>
+      </div>
     </div>
 
-    <div class="setting-group">
-      <h3>🔢 연산자 Operators</h3>
+    <div class="setting-group setting-group--ops">
+      <h3><span class="ico">🔢</span>연산자 <span class="en">Operators</span></h3>
       <div class="op-grid">
         <label class="op-check"><input type="checkbox" id="op-add" value="+" checked><span class="op-symbol">+</span></label>
         <label class="op-check"><input type="checkbox" id="op-sub" value="-" checked><span class="op-symbol">−</span></label>
@@ -390,20 +672,22 @@
       </div>
     </div>
 
-    <div class="setting-group">
-      <h3>🧩 빈칸 개수 Blanks</h3>
-      <div class="slider-container">
-        <label>숫자 Number (<span id="num-val">4</span>): </label>
-        <input type="range" id="num-blanks" min="0" max="9" value="4">
-      </div>
-      <div class="slider-container">
-        <label>수식 Operator (<span id="op-val">0</span>): </label>
-        <input type="range" id="op-blanks" min="0" max="5" value="0">
+    <div class="setting-group setting-group--blanks">
+      <h3><span class="ico">🧩</span>빈칸 개수 <span class="en">Blanks</span></h3>
+      <div class="blanks-sliders">
+        <div class="slider-container">
+          <label>숫자 (<span id="num-val">4</span>)</label>
+          <input type="range" id="num-blanks" min="0" max="9" value="4">
+        </div>
+        <div class="slider-container">
+          <label>수식 (<span id="op-val">0</span>)</label>
+          <input type="range" id="op-blanks" min="0" max="5" value="0">
+        </div>
       </div>
     </div>
   </div>
 
-  <button class="start-btn" onclick="startGame()">✏️ 게임 시작! Start</button>
+  <button class="start-btn" onpointerdown="startGame()">✏️ 게임 시작! Start</button>
   <a href="http://킹수학.com" target="_self" class="other-game-link">🔗 다른 게임 고르기 Other Games</a>
 </div>
 
@@ -411,10 +695,6 @@
   <div id="timer-display" style="display:none;"></div>
 
   <div class="arena-wrap">
-    <div class="vs-badge" id="vs-badge">
-      <span class="vs-badge-text">VS</span>
-      <button class="vs-retry-btn" onclick="goHome()">🔄<br>다시하기</button>
-    </div>
     <div class="battle-arena">
       <div class="player-board" id="board-p1">
         <div class="board-banner" id="banner-p1"><div class="board-banner-inner"><div class="banner-title"></div><div class="banner-sub"></div></div></div>
@@ -422,6 +702,24 @@
         <div class="grid-container" id="grid-p1" data-team="p1"></div>
         <div class="palette" id="palette-p1" data-team="p1"></div>
       </div>
+
+      <!-- 중간 divider (VS 배지 포함) -->
+      <div class="middle-divider-bar">
+        <div class="vs-badge" id="vs-badge">
+          <span class="vs-badge-text">VS</span>
+          <button class="vs-retry-btn" onpointerdown="goHome()">🔄<br>다시하기</button>
+        </div>
+
+        <!-- 가운데 하단 크기 조절 버튼 패널 -->
+        <div class="scale-control-panel">
+          <div class="scale-label-line">퍼즐</div>
+          <div class="scale-label-line">크기</div>
+          <button class="scale-action-btn" onpointerdown="adjustScale(5)">+</button>
+          <button class="scale-action-btn" onpointerdown="adjustScale(-5)">-</button>
+          <div id="scale-pct" class="scale-pct-text">100%</div>
+        </div>
+      </div>
+
       <div class="player-board" id="board-p2">
         <div class="board-banner" id="banner-p2"><div class="board-banner-inner"><div class="banner-title"></div><div class="banner-sub"></div></div></div>
         <h2>🔵 오른쪽팀 Right Team</h2>
@@ -434,6 +732,43 @@
 </div>
 
 <script>
+  /* ================= 전자칠판 최적화 제약 조건 적용 ================= */
+  // 1. pinch zoom 차단
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // 2. double-tap zoom 차단
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+
+  // 3. Ctrl + 마우스 휠 확대 차단
+  document.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // 4. Ctrl + 키보드 확대 (+, -, 0) 차단
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && (e.key === '=' || e.key === '-' || e.key === '0' || e.key === '+' || e.key === 'KeyU')) {
+      e.preventDefault();
+    }
+  });
+
+  // 5. 우클릭 및 롱프레스 컨텍스트 메뉴 차단
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+  });
+
   /* ================= 효과음 (Web Audio API, 외부 파일 없음) ================= */
   let audioCtx = null;
   function getCtx() {
@@ -486,7 +821,7 @@
   });
 
   diffBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('pointerdown', (e) => {
       sfxClick();
       diffBtns.forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
@@ -500,6 +835,23 @@
   });
 
   function updateActiveBtn() { diffBtns.forEach(b => b.classList.remove('active')); }
+
+  /* ================= 퍼즐 크기/높이 조절 로직 ================= */
+  let currentScale = 100;
+
+  function setScale(val) {
+    currentScale = parseInt(val);
+    if (currentScale < 50) currentScale = 50;
+    if (currentScale > 130) currentScale = 130;
+    const scale = currentScale / 100;
+    document.documentElement.style.setProperty('--puzzle-scale', scale);
+    const pctBadge = document.getElementById('scale-pct');
+    if (pctBadge) pctBadge.textContent = currentScale + '%';
+  }
+
+  function adjustScale(amount) {
+    setScale(currentScale + amount);
+  }
 
   let currentAnswerData = {};
   let timerInterval = null;
@@ -682,33 +1034,28 @@
     if (gameLocked) return;
     sfxPickup();
     const el = e.target;
-    el.setPointerCapture(e.pointerId);
 
     const rect = el.getBoundingClientRect();
+    const halfWidth = rect.width / 2;
+    const halfHeight = rect.height / 2;
 
-    // 최초 위치는 fixed left/top으로 한 번만 고정하고,
-    // 이후 이동은 transform으로만 처리해 리플로우를 방지한다.
-    el.classList.add('dragging');
-    el.style.position = 'fixed';
-    el.style.left = rect.left + 'px';
-    el.style.top = rect.top + 'px';
-    el.style.width = rect.width + 'px';
-    el.style.height = rect.height + 'px';
-    el.style.margin = '0';
-    el.style.transform = 'translate3d(0,0,0)';
-    el.style.willChange = 'transform';
+    el.style.position = 'absolute';
     el.style.zIndex = 1000;
+    el.style.left = e.clientX - halfWidth + 'px';
+    el.style.top = e.clientY - halfHeight + 'px';
 
     document.body.appendChild(el);
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch (err) {
+      console.warn("setPointerCapture failed:", err);
+    }
 
     activeDragItems[e.pointerId] = {
       el: el,
       team: el.dataset.team,
-      originX: rect.left + rect.width / 2,
-      originY: rect.top + rect.height / 2,
-      pendingX: e.clientX,
-      pendingY: e.clientY,
-      rafId: null
+      halfWidth: halfWidth,
+      halfHeight: halfHeight
     };
 
     el.addEventListener('pointermove', handlePointerMove);
@@ -717,33 +1064,18 @@
   }
 
   function handlePointerMove(e) {
-    const item = activeDragItems[e.pointerId];
-    if (!item) return;
-
-    // 최신 좌표만 기록해두고, 실제 스타일 갱신은 rAF 콜백에서 한 번만 수행
-    item.pendingX = e.clientX;
-    item.pendingY = e.clientY;
-
-    if (item.rafId === null) {
-      item.rafId = requestAnimationFrame(() => {
-        item.rafId = null;
-        const dx = item.pendingX - item.originX;
-        const dy = item.pendingY - item.originY;
-        item.el.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
-      });
-    }
+    const dragItem = activeDragItems[e.pointerId];
+    if (!dragItem) return;
+    const el = dragItem.el;
+    el.style.left = e.clientX - dragItem.halfWidth + 'px';
+    el.style.top = e.clientY - dragItem.halfHeight + 'px';
   }
 
   function handlePointerUp(e) {
-    const item = activeDragItems[e.pointerId];
-    if (!item) return;
-    const el = item.el;
-    const team = item.team;
-
-    if (item.rafId !== null) {
-      cancelAnimationFrame(item.rafId);
-      item.rafId = null;
-    }
+    if (!activeDragItems[e.pointerId]) return;
+    const itemInfo = activeDragItems[e.pointerId];
+    const el = itemInfo.el;
+    const team = itemInfo.team;
 
     el.removeEventListener('pointermove', handlePointerMove);
     el.removeEventListener('pointerup', handlePointerUp);
@@ -753,17 +1085,10 @@
     const targetUnder = document.elementFromPoint(e.clientX, e.clientY);
     el.style.visibility = 'visible';
 
-    // 드래그용 인라인 스타일 초기화 (원래 레이아웃 흐름으로 복귀)
-    el.classList.remove('dragging');
     el.style.position = 'static';
     el.style.zIndex = '';
     el.style.left = '';
     el.style.top = '';
-    el.style.width = '';
-    el.style.height = '';
-    el.style.margin = '';
-    el.style.transform = '';
-    el.style.willChange = '';
 
     let dropzone = targetUnder ? targetUnder.closest('.dropzone') : null;
     let targetPalette = targetUnder ? targetUnder.closest('.palette') : null;
