@@ -327,7 +327,8 @@
     box-shadow: 0 4px 0 rgba(0,0,0,.35);
     transition: transform .1s ease;
   }
-  .drag-item:active { cursor:grabbing; transform: scale(1.06) rotate(-3deg); }
+  .drag-item:active { cursor:grabbing; }
+  .drag-item.dragging { transition:none; }
 
   /* 게임 종료 후 안내 */
   .end-hint {
@@ -657,7 +658,24 @@
     });
   }
 
-  /* ================= 멀티터치 드래그 앤 드롭 코어 로직 ================= */
+  /* =================================================================
+     멀티터치 드래그 앤 드롭 코어 로직 (성능 개선 버전)
+     -----------------------------------------------------------------
+     기존 코드는 매 pointermove마다 el.style.left / el.style.top 을
+     직접 갱신했습니다. left/top 변경은 브라우저의 레이아웃(리플로우)을
+     다시 계산시키는 무거운 연산이라, 손가락을 빠르게 움직이거나
+     여러 명이 동시에 드래그하면 이 계산이 밀리면서 화면상 아이템이
+     "멈춘 것처럼" 보이는 현상이 발생했습니다.
+
+     개선 포인트
+     1) 위치 이동은 레이아웃에 영향을 주지 않는 transform(translate3d)
+        으로 처리 (GPU 합성만 발생, 리플로우 없음)
+     2) pointermove 이벤트를 requestAnimationFrame으로 모아서 화면
+        주사율(프레임)당 한 번만 갱신 -> 여러 포인터가 동시에 빠르게
+        움직여도 이벤트가 쌓이지 않음
+     3) 포인터별 상태를 모두 activeDragItems에 저장해 다중 터치를
+        서로 간섭 없이 독립적으로 처리
+  ================================================================= */
   let activeDragItems = {};
 
   function handlePointerDown(e) {
@@ -668,14 +686,30 @@
 
     const rect = el.getBoundingClientRect();
 
-    el.style.position = 'absolute';
+    // 최초 위치는 fixed left/top으로 한 번만 고정하고,
+    // 이후 이동은 transform으로만 처리해 리플로우를 방지한다.
+    el.classList.add('dragging');
+    el.style.position = 'fixed';
+    el.style.left = rect.left + 'px';
+    el.style.top = rect.top + 'px';
+    el.style.width = rect.width + 'px';
+    el.style.height = rect.height + 'px';
+    el.style.margin = '0';
+    el.style.transform = 'translate3d(0,0,0)';
+    el.style.willChange = 'transform';
     el.style.zIndex = 1000;
-    el.style.left = e.clientX - rect.width / 2 + 'px';
-    el.style.top = e.clientY - rect.height / 2 + 'px';
 
     document.body.appendChild(el);
 
-    activeDragItems[e.pointerId] = { el: el, team: el.dataset.team };
+    activeDragItems[e.pointerId] = {
+      el: el,
+      team: el.dataset.team,
+      originX: rect.left + rect.width / 2,
+      originY: rect.top + rect.height / 2,
+      pendingX: e.clientX,
+      pendingY: e.clientY,
+      rafId: null
+    };
 
     el.addEventListener('pointermove', handlePointerMove);
     el.addEventListener('pointerup', handlePointerUp);
@@ -683,18 +717,33 @@
   }
 
   function handlePointerMove(e) {
-    if (!activeDragItems[e.pointerId]) return;
-    const el = activeDragItems[e.pointerId].el;
-    const rect = el.getBoundingClientRect();
-    el.style.left = e.clientX - rect.width / 2 + 'px';
-    el.style.top = e.clientY - rect.height / 2 + 'px';
+    const item = activeDragItems[e.pointerId];
+    if (!item) return;
+
+    // 최신 좌표만 기록해두고, 실제 스타일 갱신은 rAF 콜백에서 한 번만 수행
+    item.pendingX = e.clientX;
+    item.pendingY = e.clientY;
+
+    if (item.rafId === null) {
+      item.rafId = requestAnimationFrame(() => {
+        item.rafId = null;
+        const dx = item.pendingX - item.originX;
+        const dy = item.pendingY - item.originY;
+        item.el.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+      });
+    }
   }
 
   function handlePointerUp(e) {
-    if (!activeDragItems[e.pointerId]) return;
-    const itemInfo = activeDragItems[e.pointerId];
-    const el = itemInfo.el;
-    const team = itemInfo.team;
+    const item = activeDragItems[e.pointerId];
+    if (!item) return;
+    const el = item.el;
+    const team = item.team;
+
+    if (item.rafId !== null) {
+      cancelAnimationFrame(item.rafId);
+      item.rafId = null;
+    }
 
     el.removeEventListener('pointermove', handlePointerMove);
     el.removeEventListener('pointerup', handlePointerUp);
@@ -704,8 +753,17 @@
     const targetUnder = document.elementFromPoint(e.clientX, e.clientY);
     el.style.visibility = 'visible';
 
+    // 드래그용 인라인 스타일 초기화 (원래 레이아웃 흐름으로 복귀)
+    el.classList.remove('dragging');
     el.style.position = 'static';
     el.style.zIndex = '';
+    el.style.left = '';
+    el.style.top = '';
+    el.style.width = '';
+    el.style.height = '';
+    el.style.margin = '';
+    el.style.transform = '';
+    el.style.willChange = '';
 
     let dropzone = targetUnder ? targetUnder.closest('.dropzone') : null;
     let targetPalette = targetUnder ? targetUnder.closest('.palette') : null;
