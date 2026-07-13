@@ -165,13 +165,13 @@
   }
 
   #setup-screen h1 {
-    font-size: clamp(1.7rem, 4.4vw, 2.35rem); letter-spacing: .5px; line-height:1.08;
+    font-size: clamp(1.9rem, 4.6vw, 2.6rem); letter-spacing: .5px; line-height:1.08;
     text-shadow: 0 0 14px rgba(244,241,230,.3);
   }
   #setup-screen h1 .accent { color: var(--chalk-yellow); }
 
   .subtitle {
-    font-family:'Gaegu'; font-size: .92rem; color: rgba(244,241,230,.62);
+    font-family:'Gaegu'; font-size: 1.02rem; color: rgba(244,241,230,.62);
     margin-top: 5px;
   }
 
@@ -224,7 +224,7 @@
   .setting-group:hover { border-color: rgba(244,241,230,.28); }
   .setting-group h3 {
     flex: 0 0 auto;
-    font-size: .95rem; margin-bottom: var(--space-2); color: var(--chalk-white);
+    font-size: 1.08rem; margin-bottom: var(--space-2); color: var(--chalk-white);
     display:flex; align-items:center; gap:8px;
   }
   .setting-group h3 .ico {
@@ -248,7 +248,7 @@
   .timer-options label {
     background: rgba(255,255,255,.06); padding: 6px 14px; border-radius: 999px;
     cursor:pointer; border: 2px solid rgba(244,241,230,.22);
-    font-family:'Jua'; font-size:.85rem; transition:.15s;
+    font-family:'Jua'; font-size:.95rem; transition:.15s;
   }
   .timer-options input[type="radio"] { display:none; }
   .timer-options input[type="radio"]:checked + span { color:#12241f; }
@@ -261,18 +261,18 @@
   .op-check {
     display:flex; align-items:center; gap:8px;
     background: rgba(255,255,255,.05); border: 2px solid rgba(244,241,230,.2);
-    border-radius: var(--radius-sm); padding: 6px 8px; cursor:pointer; font-size:.95rem;
+    border-radius: var(--radius-sm); padding: 6px 8px; cursor:pointer; font-size:1.05rem;
     font-family:'Jua'; transition:.15s;
   }
   .op-check:has(input:checked) { border-color: var(--chalk-cyan); background: rgba(111,227,224,.14); }
   .op-check input { width:15px; height:15px; accent-color: var(--chalk-cyan); }
-  .op-symbol { font-size:1.1rem; width: 22px; text-align:center; }
+  .op-symbol { font-size:1.25rem; width: 22px; text-align:center; }
 
   .difficulty-btns { display:flex; gap:6px; flex-wrap:wrap; }
   .difficulty-btns button {
     padding: 7px 13px; border:2px solid rgba(244,241,230,.22); border-radius: 999px;
     cursor:pointer; background: rgba(255,255,255,.05); color: var(--chalk-white);
-    font-family:'Jua'; font-size:.8rem; transition:.15s;
+    font-family:'Jua'; font-size:.9rem; transition:.15s;
   }
   .difficulty-btns button.active {
     background: var(--chalk-green); color:#12241f; border-color: var(--chalk-green);
@@ -280,12 +280,12 @@
   }
 
   .blanks-sliders { display:flex; flex-direction:column; gap: var(--space-2); }
-  .slider-container { display:flex; align-items:center; gap:10px; font-family:'Jua'; font-size:.85rem; }
+  .slider-container { display:flex; align-items:center; gap:10px; font-family:'Jua'; font-size:.95rem; }
   .slider-container label { flex: 0 0 auto; white-space: nowrap; }
   input[type="range"] { flex-grow:1; accent-color: var(--chalk-cyan); height: 5px; cursor: pointer; }
 
   .start-btn {
-    width:100%; padding: 14px; font-size:1.2rem; font-family:'Jua';
+    width:100%; padding: 14px; font-size:1.35rem; font-family:'Jua';
     display:flex; align-items:center; justify-content:center; gap:8px;
     background: linear-gradient(160deg, var(--chalk-yellow), #e6a83a);
     color:#2a1c08; border:none; border-radius: var(--radius-md); cursor:pointer;
@@ -316,7 +316,7 @@
   }
 
   #timer-display {
-    font-family:'Jua'; font-size: 2rem; font-weight:normal; color: var(--chalk-yellow);
+    font-family:'Jua'; font-size: 2.2rem; font-weight:normal; color: var(--chalk-yellow);
     margin: 4px auto 10px auto; padding: 6px 24px;
     background: rgba(0,0,0,.3); border-radius: 12px;
     border: 3px dashed rgba(244,241,230,.4);
@@ -371,14 +371,19 @@
     justify-content:center;
     align-items: flex-end; /* Align board components internally to bottom */
     width:100%;
-    max-width: 1400px;
+    min-height: 0;
+    max-height: 100%;
   }
 
   .player-board {
     flex: 1 1 0;
     min-width: 0;
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     border-radius: 16px;
-    padding: calc(var(--puzzle-scale) * 12px) calc(var(--puzzle-scale) * 16px) calc(var(--puzzle-scale) * 18px) calc(var(--puzzle-scale) * 16px);
+    padding: calc(var(--puzzle-scale) * 16px) calc(var(--puzzle-scale) * 22px) calc(var(--puzzle-scale) * 20px) calc(var(--puzzle-scale) * 22px);
     display:flex; flex-direction:column; align-items:center;
     position: relative;
     background: linear-gradient(165deg, #1a352d, #102019);
@@ -392,7 +397,7 @@
   #board-p2 h2 { color: var(--chalk-cyan); text-shadow: 0 0 10px rgba(111,227,224,.4); }
 
   .player-board h2 {
-    font-size: calc(var(--puzzle-scale) * 1.5rem);
+    font-size: calc(var(--puzzle-scale) * 1.7rem);
     margin-bottom: calc(var(--puzzle-scale) * 4px);
   }
 
@@ -490,17 +495,17 @@
     background: rgba(111,227,224,.15); color: var(--chalk-cyan);
     border: 2px solid rgba(111,227,224,.5);
   }
-  .banner-title { font-size: 1.25rem; }
-  .banner-sub { font-size: .9rem; opacity:.85; margin-top:2px; }
+  .banner-title { font-size: 1.4rem; }
+  .banner-sub { font-size: 1rem; opacity:.85; margin-top:2px; }
   @keyframes bannerPop { 0%{ transform:scale(.7); } 60%{ transform:scale(1.08);} 100%{ transform:scale(1);} }
   @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
 
   /* 퍼즐 그리드 */
   .grid-container {
     display:grid;
-    grid-template-columns: repeat(5, calc(var(--puzzle-scale) * min(11vw, 11vh, 120px)));
-    grid-template-rows: repeat(5, calc(var(--puzzle-scale) * min(11vw, 11vh, 120px)));
-    gap: calc(var(--puzzle-scale) * 5px);
+    grid-template-columns: repeat(5, calc(var(--puzzle-scale) * min(15vw, 9vh, 130px)));
+    grid-template-rows: repeat(5, calc(var(--puzzle-scale) * min(15vw, 9vh, 130px)));
+    gap: calc(var(--puzzle-scale) * 6px);
     width:max-content;
     margin: calc(var(--puzzle-scale) * 4px) auto calc(var(--puzzle-scale) * 12px) auto;
     background: rgba(0,0,0,.22);
@@ -509,7 +514,7 @@
   }
   .cell {
     display:flex; justify-content:center; align-items:center;
-    font-size: calc(var(--puzzle-scale) * clamp(1.4rem, 3vw, 2.1rem));
+    font-size: calc(var(--puzzle-scale) * clamp(1.6rem, 3.4vw, 2.4rem));
     font-family:'Jua'; color: var(--chalk-white);
     background: rgba(255,255,255,.03); border-radius: 8px;
     box-sizing:border-box;
@@ -538,10 +543,10 @@
   }
 
   .drag-item {
-    width: calc(var(--puzzle-scale) * min(11vw, 10vh, 90px));
-    height: calc(var(--puzzle-scale) * min(11vw, 10vh, 90px));
+    width: calc(var(--puzzle-scale) * min(12vw, 7vh, 100px));
+    height: calc(var(--puzzle-scale) * min(12vw, 7vh, 100px));
     display:flex; justify-content:center; align-items:center;
-    font-size: calc(var(--puzzle-scale) * clamp(1.4rem, 3vw, 2rem));
+    font-size: calc(var(--puzzle-scale) * clamp(1.6rem, 3.2vw, 2.2rem));
     font-family:'Jua'; color:#2a1c08;
     background: linear-gradient(160deg, var(--chalk-white), #d8d3c2);
     border-radius: 10px; cursor:grab; user-select:none;
@@ -551,6 +556,14 @@
   }
   .drag-item:active { cursor:grabbing; }
   .drag-item.dragging { transition:none; }
+
+  /* 팔레트에서 카드가 빠져나갈 때 자리를 유지해 레이아웃이 출렁이지 않도록 함 */
+  .drag-item.placeholder {
+    visibility: hidden;
+    pointer-events: none;
+    cursor: default;
+    box-shadow: none;
+  }
 
   /* 게임 종료 후 안내 */
   .end-hint {
@@ -1030,10 +1043,34 @@
   ================================================================= */
   let activeDragItems = {};
 
+  /* 카드가 팔레트에서 빠져나갈 때, 원래 자리에 보이지 않는 자리표시자를 남겨
+     팔레트 높이가 카드 개수에 따라 줄었다 늘었다 하지 않도록 한다 */
+  function pickupFromPalette(el) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'drag-item placeholder';
+    el.parentNode.insertBefore(placeholder, el);
+    el._placeholder = placeholder;
+  }
+
+  /* 카드가 팔레트로 돌아올 때, 자신의 자리표시자가 있으면 그 위치를 그대로 이어받는다 */
+  function returnToPalette(el, paletteEl) {
+    if (el._placeholder && el._placeholder.parentNode) {
+      el._placeholder.parentNode.insertBefore(el, el._placeholder);
+      el._placeholder.remove();
+      el._placeholder = null;
+    } else {
+      paletteEl.appendChild(el);
+    }
+  }
+
   function handlePointerDown(e) {
     if (gameLocked) return;
     sfxPickup();
     const el = e.target;
+
+    if (el.parentNode && el.parentNode.classList.contains('palette')) {
+      pickupFromPalette(el);
+    }
 
     const rect = el.getBoundingClientRect();
     const halfWidth = rect.width / 2;
@@ -1095,16 +1132,16 @@
 
     if (dropzone && dropzone.dataset.team === team) {
       if (dropzone.children.length > 0) {
-        document.getElementById(`palette-${team}`).appendChild(dropzone.children[0]);
+        returnToPalette(dropzone.children[0], document.getElementById(`palette-${team}`));
       }
       dropzone.appendChild(el);
       dropzone.classList.add('filled');
       sfxClick();
       checkCompleteWin(team);
     } else if (targetPalette && targetPalette.dataset.team === team) {
-      targetPalette.appendChild(el);
+      returnToPalette(el, targetPalette);
     } else {
-      document.getElementById(`palette-${team}`).appendChild(el);
+      returnToPalette(el, document.getElementById(`palette-${team}`));
     }
 
     delete activeDragItems[e.pointerId];
@@ -1176,7 +1213,7 @@
         i++;
         setTimeout(() => {
           item.style.setProperty('--rot', (Math.random() * 40 - 20) + 'deg');
-          palette.appendChild(item);
+          returnToPalette(item, palette);
           zone.classList.remove('filled');
           item.classList.add('scatter-drop');
           setTimeout(() => item.classList.remove('scatter-drop'), 500);
